@@ -203,7 +203,7 @@ export default function ContactFormSection({ fullPage = false }) {
             </p>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="contact-two-col">
             <div>
               <label htmlFor="contact-phone">Phone Number (Optional)</label>
               <input id="contact-phone" type="tel" placeholder="03001234567" {...register('phone')} />

@@ -99,7 +99,7 @@ export default function Header() {
               className="nav mobile-nav-drawer"
               style={{
                 position: 'absolute',
-                top: '78px',
+                top: '100%',
                 left: 0,
                 right: 0,
                 background: '#071020',

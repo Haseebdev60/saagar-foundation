@@ -375,18 +375,8 @@ export default function AdminDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#f5f4ef', display: 'flex', flexDirection: 'column' }}>
       {/* Top Admin Navbar */}
-      <header
-        style={{
-          background: '#071020',
-          color: 'white',
-          padding: '16px 28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <header className="admin-header">
+        <div className="admin-header-title">
           <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px', margin: 0, color: '#efc75e' }}>
             Saagar Admin Portal
           </h1>
@@ -395,7 +385,7 @@ export default function AdminDashboard() {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div className="admin-header-actions">
           <span style={{ fontSize: '12px', color: '#c5c9d4' }}>
             Signed in as <strong>{user?.email}</strong>
           </span>
@@ -435,36 +425,16 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main Admin Body */}
-      <div style={{ display: 'flex', flex: 1 }}>
+      <div className="admin-layout">
         {/* Sidebar Nav */}
-        <aside
-          style={{
-            width: '240px',
-            background: '#0a1426',
-            color: '#c5c9d4',
-            padding: '24px 14px',
-            borderRight: '1px solid rgba(255,255,255,0.08)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}
-        >
+        <aside className="admin-sidebar">
           <button
             onClick={() => setActiveTab('overview')}
+            className="admin-nav-item"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              border: 0,
               background: activeTab === 'overview' ? '#efc75e' : 'transparent',
               color: activeTab === 'overview' ? '#071020' : '#c5c9d4',
               fontWeight: activeTab === 'overview' ? 700 : 500,
-              fontSize: '13px',
-              textAlign: 'left',
-              cursor: 'pointer',
             }}
           >
             <LayoutDashboard size={17} /> Overview
@@ -472,20 +442,11 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab('events')}
+            className="admin-nav-item"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              border: 0,
               background: activeTab === 'events' ? '#efc75e' : 'transparent',
               color: activeTab === 'events' ? '#071020' : '#c5c9d4',
               fontWeight: activeTab === 'events' ? 700 : 500,
-              fontSize: '13px',
-              textAlign: 'left',
-              cursor: 'pointer',
             }}
           >
             <Calendar size={17} /> Events Management
@@ -497,20 +458,12 @@ export default function AdminDashboard() {
               loadSubmissions(submissionFilter);
               loadStats();
             }}
+            className="admin-nav-item"
             style={{
-              display: 'flex',
-              alignItems: 'center',
               justifyContent: 'space-between',
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              border: 0,
               background: activeTab === 'submissions' ? '#efc75e' : 'transparent',
               color: activeTab === 'submissions' ? '#071020' : '#c5c9d4',
               fontWeight: activeTab === 'submissions' ? 700 : 500,
-              fontSize: '13px',
-              textAlign: 'left',
-              cursor: 'pointer',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -534,20 +487,11 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab('donation')}
+            className="admin-nav-item"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              border: 0,
               background: activeTab === 'donation' ? '#efc75e' : 'transparent',
               color: activeTab === 'donation' ? '#071020' : '#c5c9d4',
               fontWeight: activeTab === 'donation' ? 700 : 500,
-              fontSize: '13px',
-              textAlign: 'left',
-              cursor: 'pointer',
             }}
           >
             <CreditCard size={17} /> Donation Bank Info
@@ -555,20 +499,11 @@ export default function AdminDashboard() {
 
           <button
             onClick={() => setActiveTab('founder')}
+            className="admin-nav-item"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              border: 0,
               background: activeTab === 'founder' ? '#efc75e' : 'transparent',
               color: activeTab === 'founder' ? '#071020' : '#c5c9d4',
               fontWeight: activeTab === 'founder' ? 700 : 500,
-              fontSize: '13px',
-              textAlign: 'left',
-              cursor: 'pointer',
             }}
           >
             <User size={17} /> Founder Content
@@ -580,20 +515,11 @@ export default function AdminDashboard() {
               setPasswordNotice('');
               setPasswordError('');
             }}
+            className="admin-nav-item"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              width: '100%',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              border: 0,
               background: activeTab === 'security' ? '#efc75e' : 'transparent',
               color: activeTab === 'security' ? '#071020' : '#c5c9d4',
               fontWeight: activeTab === 'security' ? 700 : 500,
-              fontSize: '13px',
-              textAlign: 'left',
-              cursor: 'pointer',
             }}
           >
             <Lock size={17} /> Update Password
@@ -601,7 +527,7 @@ export default function AdminDashboard() {
         </aside>
 
         {/* Content Pane */}
-        <main style={{ flex: 1, padding: '32px 36px', overflowY: 'auto' }}>
+        <main className="admin-content">
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
             <div>
@@ -628,7 +554,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Genuine Stats Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '36px' }}>
+              <div className="admin-stats-grid">
                 <div style={{ background: '#fff', padding: '22px 24px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', borderTop: '4px solid #efc75e' }}>
                   <span style={{ fontSize: '11px', color: '#888', fontWeight: 600, letterSpacing: '0.05em' }}>TOTAL EVENTS</span>
                   <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '36px', fontWeight: 700, color: '#071020', margin: '6px 0' }}>
@@ -712,65 +638,67 @@ export default function AdminDashboard() {
 
               {/* Events Table */}
               <div style={{ background: '#fff', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
-                  <thead style={{ background: '#071020', color: 'white' }}>
-                    <tr>
-                      <th style={{ padding: '14px 18px' }}>Cover</th>
-                      <th style={{ padding: '14px 18px' }}>Title</th>
-                      <th style={{ padding: '14px 18px' }}>Category</th>
-                      <th style={{ padding: '14px 18px' }}>Location</th>
-                      <th style={{ padding: '14px 18px' }}>Status</th>
-                      <th style={{ padding: '14px 18px', textAlign: 'right' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {events.map((evt) => (
-                      <tr key={evt._id} style={{ borderBottom: '1px solid #eee' }}>
-                        <td style={{ padding: '12px 18px' }}>
-                          <img
-                            src={evt.image}
-                            alt=""
-                            style={{ width: '56px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
-                          />
-                        </td>
-                        <td style={{ padding: '12px 18px', fontWeight: 600, color: '#071020' }}>{evt.title}</td>
-                        <td style={{ padding: '12px 18px' }}>
-                          <span style={{ background: '#eee', padding: '3px 8px', borderRadius: '4px', fontSize: '11px' }}>
-                            {evt.category}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 18px', color: '#666', fontSize: '12px' }}>{evt.location}</td>
-                        <td style={{ padding: '12px 18px' }}>
-                          {evt.isPublished ? (
-                            <span style={{ color: '#27ae60', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
-                              <CheckCircle size={14} /> Published
-                            </span>
-                          ) : (
-                            <span style={{ color: '#888', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
-                              <XCircle size={14} /> Draft
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ padding: '12px 18px', textAlign: 'right' }}>
-                          <button
-                            onClick={() => openEditEventModal(evt)}
-                            style={{ background: 'none', border: 0, color: '#bd9636', cursor: 'pointer', marginRight: '14px' }}
-                            title="Edit Event"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteEvent(evt._id)}
-                            style={{ background: 'none', border: 0, color: '#d9383a', cursor: 'pointer' }}
-                            title="Delete Event"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
+                <div className="admin-table-scroll">
+                  <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                    <thead style={{ background: '#071020', color: 'white' }}>
+                      <tr>
+                        <th style={{ padding: '14px 18px' }}>Cover</th>
+                        <th style={{ padding: '14px 18px' }}>Title</th>
+                        <th style={{ padding: '14px 18px' }}>Category</th>
+                        <th style={{ padding: '14px 18px' }}>Location</th>
+                        <th style={{ padding: '14px 18px' }}>Status</th>
+                        <th style={{ padding: '14px 18px', textAlign: 'right' }}>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {events.map((evt) => (
+                        <tr key={evt._id} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '12px 18px' }}>
+                            <img
+                              src={evt.image}
+                              alt=""
+                              style={{ width: '56px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                            />
+                          </td>
+                          <td style={{ padding: '12px 18px', fontWeight: 600, color: '#071020' }}>{evt.title}</td>
+                          <td style={{ padding: '12px 18px' }}>
+                            <span style={{ background: '#eee', padding: '3px 8px', borderRadius: '4px', fontSize: '11px' }}>
+                              {evt.category}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 18px', color: '#666', fontSize: '12px' }}>{evt.location}</td>
+                          <td style={{ padding: '12px 18px' }}>
+                            {evt.isPublished ? (
+                              <span style={{ color: '#27ae60', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+                                <CheckCircle size={14} /> Published
+                              </span>
+                            ) : (
+                              <span style={{ color: '#888', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+                                <XCircle size={14} /> Draft
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '12px 18px', textAlign: 'right' }}>
+                            <button
+                              onClick={() => openEditEventModal(evt)}
+                              style={{ background: 'none', border: 0, color: '#bd9636', cursor: 'pointer', marginRight: '14px' }}
+                              title="Edit Event"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteEvent(evt._id)}
+                              style={{ background: 'none', border: 0, color: '#d9383a', cursor: 'pointer' }}
+                              title="Delete Event"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -878,7 +806,7 @@ export default function AdminDashboard() {
                   <p style={{ fontSize: '14px', color: '#666' }}>No messages found in this category.</p>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: selectedSubmission ? '1fr 1.2fr' : '1fr', gap: '20px' }}>
+                <div className="admin-inquiries-grid">
                   <div style={{ background: '#fff', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
                     {submissions.map((sub) => (
                       <div
@@ -944,27 +872,46 @@ export default function AdminDashboard() {
 
                   {/* Selected Message Inspector */}
                   {selectedSubmission && (
-                    <div style={{ background: '#fff', borderRadius: '10px', padding: '28px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
-                        <div>
-                          <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '22px', margin: '0 0 4px' }}>
-                            {selectedSubmission.name}
-                          </h3>
-                          <a href={`mailto:${selectedSubmission.email}`} style={{ fontSize: '13px', color: '#071020', fontWeight: 600, textDecoration: 'underline' }}>
-                            {selectedSubmission.email}
-                          </a>
-                          {selectedSubmission.phone && (
-                            <span style={{ fontSize: '13px', color: '#666', marginLeft: '12px' }}>
-                              Phone: <a href={`tel:${selectedSubmission.phone}`}>{selectedSubmission.phone}</a>
-                            </span>
-                          )}
-                        </div>
+                    <div style={{ background: '#fff', borderRadius: '10px', padding: 'clamp(18px, 4vw, 28px)', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                        <button
+                          onClick={() => setSelectedSubmission(null)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: '#f0f0f0',
+                            border: 0,
+                            borderRadius: '4px',
+                            padding: '6px 10px',
+                            fontSize: '11px',
+                            color: '#555',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                          }}
+                        >
+                          ← Back to inquiries list
+                        </button>
                         <button
                           onClick={() => setSelectedSubmission(null)}
                           style={{ background: 'none', border: 0, color: '#888', cursor: 'pointer' }}
                         >
                           <X size={18} />
                         </button>
+                      </div>
+
+                      <div style={{ marginBottom: '18px' }}>
+                        <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '22px', margin: '0 0 4px' }}>
+                          {selectedSubmission.name}
+                        </h3>
+                        <a href={`mailto:${selectedSubmission.email}`} style={{ fontSize: '13px', color: '#071020', fontWeight: 600, textDecoration: 'underline' }}>
+                          {selectedSubmission.email}
+                        </a>
+                        {selectedSubmission.phone && (
+                          <span style={{ fontSize: '13px', color: '#666', marginLeft: '12px' }}>
+                            Phone: <a href={`tel:${selectedSubmission.phone}`}>{selectedSubmission.phone}</a>
+                          </span>
+                        )}
                       </div>
 
                       <div style={{ background: '#faf8f2', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
@@ -1045,7 +992,7 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+                <div className="admin-form-row">
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Bank Name</label>
                     <input
@@ -1079,7 +1026,7 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+                <div className="admin-form-row">
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Support Helpline Phone</label>
                     <input
@@ -1136,7 +1083,7 @@ export default function AdminDashboard() {
               )}
 
               <form onSubmit={handleSaveFounder} style={{ background: '#fff', padding: '32px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+                <div className="admin-form-row">
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Founder Name</label>
                     <input
@@ -1478,7 +1425,7 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div className="admin-form-row">
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Category *</label>
                     <select
@@ -1505,7 +1452,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div className="admin-form-row">
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Location *</label>
                     <input

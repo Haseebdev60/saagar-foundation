@@ -52,11 +52,11 @@ export default function AdminLogin() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       style={{
-        minHeight: '80vh',
+        minHeight: 'calc(100vh - 120px)',
         display: 'grid',
         placeItems: 'center',
         background: '#071020',
-        padding: '60px 20px',
+        padding: '30px 16px',
       }}
     >
       <div
@@ -65,7 +65,7 @@ export default function AdminLogin() {
           maxWidth: '460px',
           background: '#fff',
           borderRadius: '16px',
-          padding: '40px 36px',
+          padding: 'clamp(28px, 6vw, 44px) clamp(20px, 6vw, 36px)',
           boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
         }}
       >

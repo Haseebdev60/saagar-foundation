@@ -116,7 +116,7 @@ export default function About() {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '1160px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '24px', maxWidth: '1160px', margin: '0 auto' }}>
           <div style={{ background: '#fff', padding: '34px 28px', border: '1px solid rgba(239,199,94,0.3)', borderRadius: '2px' }}>
             <Heart size={24} style={{ color: '#bd9636', marginBottom: '16px' }} />
             <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '20px', margin: '0 0 10px', color: '#071020' }}>
