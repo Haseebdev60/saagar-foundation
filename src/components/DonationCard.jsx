@@ -126,11 +126,11 @@ export default function DonationCard({ fullPage = false }) {
         <HelpCircle size={15} style={{ color: '#b9952e', flexShrink: 0, marginTop: '2px' }} />
         <div>
           <span>Need confirmation or have questions? Contact us at </span>
-          <a href={`tel:${data.helpPhone}`} style={{ color: '#183d31', fontWeight: 600 }}>
+          <a href={`tel:${data.helpPhone}`} style={{ color: '#071020', fontWeight: 600, textDecoration: 'underline' }}>
             {data.helpPhone}
           </a>{' '}
           or{' '}
-          <a href={`mailto:${data.helpEmail}`} style={{ color: '#183d31', fontWeight: 600 }}>
+          <a href={`mailto:${data.helpEmail}`} style={{ color: '#071020', fontWeight: 600, textDecoration: 'underline' }}>
             {data.helpEmail}
           </a>
           .

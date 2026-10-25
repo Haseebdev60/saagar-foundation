@@ -117,11 +117,11 @@ export default function Donate() {
                 </h3>
                 <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#5b616b', margin: 0 }}>
                   For acknowledgment or verification, you are welcome to send a screenshot or receipt via WhatsApp to{' '}
-                  <a href="https://wa.me/923029616426" target="_blank" rel="noreferrer" style={{ color: '#183d31', fontWeight: 600 }}>
+                  <a href="https://wa.me/923029616426" target="_blank" rel="noreferrer" style={{ color: '#071020', fontWeight: 600, textDecoration: 'underline' }}>
                     03029616426
                   </a>{' '}
                   or by emailing{' '}
-                  <a href="mailto:Saagarwelfarefoundation@gmail.com" style={{ color: '#183d31', fontWeight: 600 }}>
+                  <a href="mailto:Saagarwelfarefoundation@gmail.com" style={{ color: '#071020', fontWeight: 600, textDecoration: 'underline' }}>
                     Saagarwelfarefoundation@gmail.com
                   </a>
                   .

@@ -12,6 +12,7 @@ import {
   Edit2,
   Trash2,
   CheckCircle,
+  CheckCircle2,
   XCircle,
   Eye,
   Upload,
@@ -57,6 +58,8 @@ export default function AdminDashboard() {
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const [submissionError, setSubmissionError] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [deleteTargetSubmission, setDeleteTargetSubmission] = useState(null);
+  const [actionToast, setActionToast] = useState('');
 
   // Donation State
   const [donationData, setDonationData] = useState({
@@ -259,13 +262,21 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteSubmission = async (id) => {
-    if (!window.confirm('Delete this inquiry message permanently?')) return;
+  const triggerDeleteSubmission = (sub) => {
+    setDeleteTargetSubmission(sub);
+  };
+
+  const confirmDeleteSubmission = async () => {
+    if (!deleteTargetSubmission) return;
     try {
-      await api.deleteSubmission(id);
+      await api.deleteSubmission(deleteTargetSubmission._id);
+      const name = deleteTargetSubmission.name;
+      setDeleteTargetSubmission(null);
       setSelectedSubmission(null);
       loadSubmissions(submissionFilter);
       loadStats();
+      setActionToast(`Inquiry from ${name} has been permanently deleted.`);
+      setTimeout(() => setActionToast(''), 4500);
     } catch (err) {
       alert(`Delete failed: ${err.message}`);
     }
@@ -804,18 +815,43 @@ export default function AdminDashboard() {
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <strong style={{ fontSize: '14px', color: '#071020' }}>{sub.name}</strong>
-                          <span
-                            style={{
-                              fontSize: '10px',
-                              padding: '2px 8px',
-                              borderRadius: '10px',
-                              background: sub.status === 'unread' ? '#ffebeb' : sub.status === 'replied' ? '#eef9f2' : '#f0f0f0',
-                              color: sub.status === 'unread' ? '#d9383a' : sub.status === 'replied' ? '#27ae60' : '#666',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {sub.status.toUpperCase()}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span
+                              style={{
+                                fontSize: '10px',
+                                padding: '2px 8px',
+                                borderRadius: '10px',
+                                background: sub.status === 'unread' ? '#ffebeb' : sub.status === 'replied' ? '#eef9f2' : '#f0f0f0',
+                                color: sub.status === 'unread' ? '#d9383a' : sub.status === 'replied' ? '#27ae60' : '#666',
+                                fontWeight: 600,
+                              }}
+                            >
+                              {sub.status.toUpperCase()}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                triggerDeleteSubmission(sub);
+                              }}
+                              title="Delete inquiry"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#a0a5ad',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: 'color 0.2s',
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = '#d9383a')}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = '#a0a5ad')}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
                         </div>
                         <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
                           {sub.email} {sub.phone && `• ${sub.phone}`}
@@ -835,7 +871,7 @@ export default function AdminDashboard() {
                           <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '22px', margin: '0 0 4px' }}>
                             {selectedSubmission.name}
                           </h3>
-                          <a href={`mailto:${selectedSubmission.email}`} style={{ fontSize: '13px', color: '#183d31', textDecoration: 'underline' }}>
+                          <a href={`mailto:${selectedSubmission.email}`} style={{ fontSize: '13px', color: '#071020', fontWeight: 600, textDecoration: 'underline' }}>
                             {selectedSubmission.email}
                           </a>
                           {selectedSubmission.phone && (
@@ -875,7 +911,7 @@ export default function AdminDashboard() {
                           Mark as Read
                         </button>
                         <button
-                          onClick={() => handleDeleteSubmission(selectedSubmission._id)}
+                          onClick={() => triggerDeleteSubmission(selectedSubmission)}
                           style={{
                             marginLeft: 'auto',
                             background: 'none',
@@ -885,6 +921,9 @@ export default function AdminDashboard() {
                             borderRadius: '4px',
                             cursor: 'pointer',
                             fontSize: '11px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
                           }}
                         >
                           <Trash2 size={13} /> Delete
@@ -1291,6 +1330,203 @@ export default function AdminDashboard() {
               </form>
             </motion.div>
           </div>
+        )}
+
+        {/* DELETE SUBMISSION CONFIRMATION MODAL */}
+        {deleteTargetSubmission && (
+          <div
+            className="modal-backdrop"
+            style={{ zIndex: 120 }}
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setDeleteTargetSubmission(null);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 15 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                background: '#071020',
+                border: '1px solid rgba(239, 199, 94, 0.4)',
+                borderRadius: '16px',
+                padding: '36px 32px',
+                maxWidth: '460px',
+                width: '92%',
+                color: '#fff',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.65)',
+                textAlign: 'center',
+                position: 'relative',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setDeleteTargetSubmission(null)}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'none',
+                  border: 0,
+                  color: '#9aa0a6',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <X size={18} />
+              </button>
+
+              <div
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  background: 'rgba(217, 56, 58, 0.15)',
+                  border: '1px solid #d9383a',
+                  display: 'grid',
+                  placeItems: 'center',
+                  margin: '0 auto 18px',
+                  color: '#ff6b6d',
+                }}
+              >
+                <Trash2 size={24} />
+              </div>
+
+              <h3
+                style={{
+                  fontFamily: 'Playfair Display, serif',
+                  fontSize: '22px',
+                  margin: '0 0 10px',
+                  color: '#ffffff',
+                }}
+              >
+                Confirm Delete Inquiry
+              </h3>
+
+              <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#d1d5df', margin: '0 0 18px' }}>
+                Are you sure you want to delete the message from{' '}
+                <strong style={{ color: '#efc75e' }}>{deleteTargetSubmission.name}</strong> ({deleteTargetSubmission.email})? This action cannot be undone.
+              </p>
+
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  marginBottom: '24px',
+                  textAlign: 'left',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '10px',
+                    letterSpacing: '0.1em',
+                    color: '#efc75e',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: '4px',
+                    fontWeight: 600,
+                  }}
+                >
+                  Message Preview
+                </span>
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: '#c7c9d0',
+                    margin: 0,
+                    maxHeight: '65px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  "{deleteTargetSubmission.message}"
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTargetSubmission(null)}
+                  style={{
+                    padding: '11px 22px',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '6px',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteSubmission}
+                  style={{
+                    padding: '11px 22px',
+                    background: '#d9383a',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <Trash2 size={14} /> Yes, Delete Message
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* TOAST NOTIFICATION POP-UP */}
+        {actionToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            style={{
+              position: 'fixed',
+              bottom: '28px',
+              right: '28px',
+              zIndex: 200,
+              background: '#071020',
+              border: '1px solid #efc75e',
+              borderRadius: '10px',
+              padding: '14px 20px',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              color: '#fff',
+              maxWidth: '420px',
+            }}
+          >
+            <CheckCircle2 size={18} style={{ color: '#efc75e', flexShrink: 0 }} />
+            <span style={{ fontSize: '13px', lineHeight: 1.4 }}>{actionToast}</span>
+            <button
+              onClick={() => setActionToast('')}
+              style={{
+                background: 'none',
+                border: 0,
+                color: '#888',
+                cursor: 'pointer',
+                padding: '2px',
+                marginLeft: '8px',
+                flexShrink: 0,
+              }}
+            >
+              <X size={15} />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
