@@ -128,26 +128,28 @@ export default function ContactFormSection({ fullPage = false }) {
         {submitStatus.success ? (
           <div
             style={{
-              padding: '28px 24px',
-              background: '#f2f8f4',
-              border: '1px solid #b8dfca',
+              padding: '36px 28px',
+              background: '#071020',
+              border: '1px solid #efc75e',
               borderRadius: '12px',
               textAlign: 'center',
+              color: '#fff',
+              boxShadow: '0 12px 35px rgba(7,16,32,0.25)',
             }}
           >
-            <CheckCircle2 size={44} style={{ color: '#1f7a4a', margin: '0 auto 14px' }} />
-            <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '24px', color: '#133e29', margin: '0 0 10px' }}>
-              Message Received
+            <CheckCircle2 size={46} style={{ color: '#efc75e', margin: '0 auto 16px' }} />
+            <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '26px', color: '#efc75e', margin: '0 0 10px' }}>
+              Message Delivered
             </h3>
-            <p style={{ fontSize: '13px', lineHeight: 1.7, color: '#315241', margin: '0 0 20px' }}>
+            <p style={{ fontSize: '13px', lineHeight: 1.8, color: '#e3e5ec', margin: '0 0 24px', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
               {submitStatus.message}
             </p>
             <button
               type="button"
-              className="button button-dark"
+              className="button button-gold"
               onClick={() => setSubmitStatus({ success: false, message: '', error: '' })}
             >
-              Send Another Message
+              Send Another Inquiry
             </button>
           </div>
         ) : (
@@ -228,7 +230,7 @@ export default function ContactFormSection({ fullPage = false }) {
             )}
 
             <button
-              className="whatsapp-button form-submit"
+              className="form-submit"
               type="submit"
               disabled={isSubmitting}
               style={{ minWidth: '180px', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.8 : 1 }}

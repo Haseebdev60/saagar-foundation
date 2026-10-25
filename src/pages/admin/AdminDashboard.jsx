@@ -55,6 +55,7 @@ export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState([]);
   const [submissionFilter, setSubmissionFilter] = useState('');
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState(null);
 
   // Donation State
@@ -114,12 +115,14 @@ export default function AdminDashboard() {
   const loadSubmissions = async (status = '') => {
     try {
       setLoadingSubmissions(true);
+      setSubmissionError('');
       const res = await api.getSubmissionsAdmin(status);
       if (res.success && res.data) {
         setSubmissions(res.data);
       }
     } catch (e) {
       console.error(e);
+      setSubmissionError(e.message || 'Failed to load submissions.');
     } finally {
       setLoadingSubmissions(false);
     }
@@ -424,7 +427,11 @@ export default function AdminDashboard() {
           </button>
 
           <button
-            onClick={() => setActiveTab('submissions')}
+            onClick={() => {
+              setActiveTab('submissions');
+              loadSubmissions(submissionFilter);
+              loadStats();
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -681,7 +688,7 @@ export default function AdminDashboard() {
           {/* TAB 3: CONTACT SUBMISSIONS */}
           {activeTab === 'submissions' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
                 <div>
                   <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '28px', color: '#071020', margin: '0 0 6px' }}>
                     Contact Submissions
@@ -690,7 +697,7 @@ export default function AdminDashboard() {
                     Securely view and manage direct messages submitted by visitors.
                   </p>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => {
                       setSubmissionFilter('');
@@ -725,8 +732,55 @@ export default function AdminDashboard() {
                   >
                     Unread Only
                   </button>
+                  <button
+                    onClick={() => {
+                      loadSubmissions(submissionFilter);
+                      loadStats();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '4px',
+                      border: '1px solid #071020',
+                      background: '#071020',
+                      color: '#efc75e',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <RefreshCw size={12} className={loadingSubmissions ? 'spinner' : ''} /> {loadingSubmissions ? 'Loading...' : 'Refresh'}
+                  </button>
                 </div>
               </div>
+
+              {submissionError && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '14px',
+                    background: '#fdf2f2',
+                    borderLeft: '4px solid #d9383a',
+                    color: '#981b1d',
+                    fontSize: '13px',
+                    marginBottom: '20px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  <AlertCircle size={18} />
+                  <span>{submissionError}</span>
+                  <button
+                    onClick={() => loadSubmissions(submissionFilter)}
+                    style={{ marginLeft: 'auto', background: '#d9383a', color: '#fff', border: 0, padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
 
               {submissions.length === 0 ? (
                 <div style={{ background: '#fff', padding: '40px', textAlign: 'center', borderRadius: '10px' }}>
