@@ -307,3 +307,14 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gold-deep);
 }
+
+/* Prevent browser blue autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #faf8f2 inset !important;
+  -webkit-text-fill-color: #071020 !important;
+  caret-color: #071020 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}

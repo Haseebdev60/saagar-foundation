@@ -198,6 +198,17 @@ export const api = {
     );
   },
 
+  async updatePassword(passwordData) {
+    return handleResponse(
+      await fetch(`${BASE_URL}/auth/update-password`, {
+        method: 'PUT',
+        headers: getAuthHeaders(true),
+        credentials: 'include',
+        body: JSON.stringify(passwordData),
+      })
+    );
+  },
+
   // Image Upload
   async uploadImage(file) {
     const formData = new FormData();

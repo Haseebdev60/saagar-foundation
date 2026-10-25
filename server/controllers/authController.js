@@ -59,6 +59,38 @@ export const logout = async (req, res) => {
   return res.status(200).json({ success: true, message: 'Logged out successfully.' });
 };
 
+export const updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide both current and new password.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Administrator account not found.' });
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully. Please use your new password for future sign-ins.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getMe = async (req, res) => {
   res.status(200).json({
     success: true,

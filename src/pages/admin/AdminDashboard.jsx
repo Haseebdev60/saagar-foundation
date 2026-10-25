@@ -15,6 +15,9 @@ import {
   CheckCircle2,
   XCircle,
   Eye,
+  EyeOff,
+  Lock,
+  Key,
   Upload,
   RefreshCw,
   Loader2,
@@ -85,6 +88,18 @@ export default function AdminDashboard() {
   });
   const [savingFounder, setSavingFounder] = useState(false);
   const [founderNotice, setFounderNotice] = useState('');
+
+  // Password / Security State
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordNotice, setPasswordNotice] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
 
   // Load Initial Overview & Data
   const loadStats = async () => {
@@ -318,6 +333,45 @@ export default function AdminDashboard() {
     }
   };
 
+  // Password Update Action
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setPasswordNotice('');
+    setPasswordError('');
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New password and confirmation do not match.');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters long.');
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      const res = await api.updatePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+
+      if (res.success) {
+        setPasswordNotice(res.message || 'Password updated successfully!');
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setActionToast('Administrator password updated successfully.');
+        setTimeout(() => {
+          setActionToast('');
+          setPasswordNotice('');
+        }, 5000);
+      }
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to update password.');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: '#f5f4ef', display: 'flex', flexDirection: 'column' }}>
       {/* Top Admin Navbar */}
@@ -518,6 +572,31 @@ export default function AdminDashboard() {
             }}
           >
             <User size={17} /> Founder Content
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('security');
+              setPasswordNotice('');
+              setPasswordError('');
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              width: '100%',
+              padding: '12px 14px',
+              borderRadius: '6px',
+              border: 0,
+              background: activeTab === 'security' ? '#efc75e' : 'transparent',
+              color: activeTab === 'security' ? '#071020' : '#c5c9d4',
+              fontWeight: activeTab === 'security' ? 700 : 500,
+              fontSize: '13px',
+              textAlign: 'left',
+              cursor: 'pointer',
+            }}
+          >
+            <Lock size={17} /> Update Password
           </button>
         </aside>
 
@@ -1149,6 +1228,200 @@ export default function AdminDashboard() {
 
                 <button type="submit" disabled={savingFounder} className="button button-gold">
                   {savingFounder ? 'Saving...' : 'Save Founder Profile'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* TAB 6: SECURITY / UPDATE PASSWORD */}
+          {activeTab === 'security' && (
+            <div style={{ maxWidth: '640px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '28px', color: '#071020', margin: '0 0 6px' }}>
+                  Update Administrator Password
+                </h2>
+                <p style={{ fontSize: '13px', color: '#666b76', margin: 0 }}>
+                  Manage the primary login credentials for Saagar Foundation portal access.
+                </p>
+              </div>
+
+              {passwordNotice && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '14px 16px',
+                    background: '#071020',
+                    border: '1px solid #efc75e',
+                    color: '#fff',
+                    fontSize: '13px',
+                    marginBottom: '20px',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <CheckCircle2 size={18} style={{ color: '#efc75e', flexShrink: 0 }} />
+                  <span>{passwordNotice}</span>
+                </div>
+              )}
+
+              {passwordError && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px 16px',
+                    background: '#fdf2f2',
+                    borderLeft: '4px solid #d9383a',
+                    color: '#981b1d',
+                    fontSize: '13px',
+                    marginBottom: '20px',
+                    borderRadius: '6px',
+                  }}
+                >
+                  <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                  <span>{passwordError}</span>
+                </div>
+              )}
+
+              <form
+                onSubmit={handleUpdatePassword}
+                autoComplete="off"
+                style={{
+                  background: '#fff',
+                  padding: '32px',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.04)',
+                }}
+              >
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#071020', marginBottom: '8px' }}>
+                    Current Password *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showCurrentPass ? 'text' : 'password'}
+                      required
+                      autoComplete="current-password"
+                      value={passwordForm.currentPassword}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '12px 42px 12px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #c9cec5',
+                        fontSize: '13px',
+                        background: '#faf8f2',
+                        outline: 'none',
+                        color: '#071020',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPass(!showCurrentPass)}
+                      tabIndex={-1}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '12px',
+                        background: 'none',
+                        border: 0,
+                        color: '#888',
+                        cursor: 'pointer',
+                        padding: '2px',
+                      }}
+                    >
+                      {showCurrentPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#071020', marginBottom: '8px' }}>
+                    New Password *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showNewPass ? 'text' : 'password'}
+                      required
+                      minLength={6}
+                      autoComplete="new-password"
+                      value={passwordForm.newPassword}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '12px 42px 12px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #c9cec5',
+                        fontSize: '13px',
+                        background: '#faf8f2',
+                        outline: 'none',
+                        color: '#071020',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPass(!showNewPass)}
+                      tabIndex={-1}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '12px',
+                        background: 'none',
+                        border: 0,
+                        color: '#888',
+                        cursor: 'pointer',
+                        padding: '2px',
+                      }}
+                    >
+                      {showNewPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <span style={{ fontSize: '11px', color: '#888', marginTop: '6px', display: 'block' }}>
+                    Must be at least 6 characters long.
+                  </span>
+                </div>
+
+                <div style={{ marginBottom: '28px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#071020', marginBottom: '8px' }}>
+                    Confirm New Password *
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '6px',
+                      border: '1px solid #c9cec5',
+                      fontSize: '13px',
+                      background: '#faf8f2',
+                      outline: 'none',
+                      color: '#071020',
+                    }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingPassword}
+                  className="button button-gold"
+                  style={{ padding: '12px 24px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  {savingPassword ? (
+                    <>
+                      <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Updating Password...
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={15} /> Save New Password
+                    </>
+                  )}
                 </button>
               </form>
             </div>

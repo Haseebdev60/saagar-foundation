@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Shield, Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowRight, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/saagar-logo.jpg';
@@ -8,6 +8,7 @@ import logo from '../../assets/saagar-logo.jpg';
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,10 +18,18 @@ export default function AdminLogin() {
 
   const from = location.state?.from?.pathname || '/admin';
 
+  // Clear inputs on mount so no cached credentials display
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+  }, []);
+
   // If already logged in, redirect
-  if (user) {
-    navigate('/admin', { replace: true });
-  }
+  useEffect(() => {
+    if (user) {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -102,7 +111,7 @@ export default function AdminLogin() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <div style={{ marginBottom: '18px' }}>
             <label
               htmlFor="admin-email"
@@ -113,11 +122,12 @@ export default function AdminLogin() {
             <div style={{ position: 'relative' }}>
               <input
                 id="admin-email"
+                name="admin_login_user"
                 type="email"
                 required
+                autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@saagarfoundation.org"
                 style={{
                   width: '100%',
                   padding: '12px 14px 12px 38px',
@@ -125,6 +135,8 @@ export default function AdminLogin() {
                   border: '1px solid #c9cec5',
                   fontSize: '13px',
                   background: '#faf8f2',
+                  color: '#071020',
+                  outline: 'none',
                 }}
               />
               <Mail size={16} style={{ position: 'absolute', left: '12px', top: '14px', color: '#888' }} />
@@ -141,21 +153,41 @@ export default function AdminLogin() {
             <div style={{ position: 'relative' }}>
               <input
                 id="admin-password"
-                type="password"
+                name="admin_login_pass"
+                type={showPassword ? 'text' : 'password'}
                 required
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
                 style={{
                   width: '100%',
-                  padding: '12px 14px 12px 38px',
+                  padding: '12px 38px 12px 38px',
                   borderRadius: '8px',
                   border: '1px solid #c9cec5',
                   fontSize: '13px',
                   background: '#faf8f2',
+                  color: '#071020',
+                  outline: 'none',
                 }}
               />
               <Lock size={16} style={{ position: 'absolute', left: '12px', top: '14px', color: '#888' }} />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '12px',
+                  background: 'none',
+                  border: 0,
+                  color: '#888',
+                  cursor: 'pointer',
+                  padding: '2px',
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
