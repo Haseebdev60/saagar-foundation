@@ -1,26 +1,39 @@
 import mongoose from 'mongoose';
 
-let isConnected = false;
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
 export const connectDB = async () => {
-  if (isConnected || mongoose.connection.readyState === 1) {
-    return mongoose.connection;
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    return cached.conn;
   }
 
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    console.warn('[MongoDB] MONGODB_URI not found in environment.');
+    throw new Error('MONGODB_URI is missing from environment');
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
+    };
+
+    cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
+      console.log(`[MongoDB Atlas] Connected successfully.`);
+      return mongooseInstance;
+    });
   }
 
   try {
-    const conn = await mongoose.connect(uri || 'mongodb://127.0.0.1:27017/saagar_foundation', {
-      serverSelectionTimeoutMS: 8000,
-    });
-    isConnected = true;
-    console.log(`[MongoDB] Connected successfully: ${conn.connection.host}/${conn.connection.name}`);
-    return conn;
+    cached.conn = await cached.promise;
+    return cached.conn;
   } catch (error) {
-    console.error(`[MongoDB] Connection error: ${error.message}`);
+    cached.promise = null;
+    console.error(`[MongoDB Atlas Error]: ${error.message}`);
     throw error;
   }
 };
