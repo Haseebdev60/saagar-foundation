@@ -8,7 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { connectDB } from './config/db.js';
-import { errorHandler, notFound } from './middleware/errorHandler.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
@@ -45,23 +45,26 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
-// Ensure database is connected for every API request
+// Connect to MongoDB
 app.use(async (req, res, next) => {
-  if (req.originalUrl.startsWith('/api')) {
-    try {
-      await connectDB();
-    } catch (err) {
-      return res.status(500).json({ success: false, message: 'Database connection failed' });
-    }
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('[DB Error in Request]:', err.message);
+    return res.status(500).json({ success: false, message: 'Database connection failed' });
   }
-  next();
 });
 
-// Static uploads directory (for local development)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static uploads directory (for non-serverless local development)
+if (!process.env.VERCEL) {
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+}
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// Router to support both /api/... and direct serverless rewrites
+const apiRouter = express.Router();
+
+apiRouter.get('/health', (req, res) => {
   res.status(200).json({
     status: 'online',
     timestamp: new Date().toISOString(),
@@ -70,16 +73,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/donation-info', donationRoutes);
-app.use('/api/founder-info', founderRoutes);
-app.use('/api/upload', uploadRoutes);
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/events', eventRoutes);
+apiRouter.use('/contact', contactRoutes);
+apiRouter.use('/donation-info', donationRoutes);
+apiRouter.use('/founder-info', founderRoutes);
+apiRouter.use('/upload', uploadRoutes);
 
-// Error handling for API routes
-app.use('/api/*', notFound);
+// Mount on both /api and root so serverless requests always match
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
+
+// Central error handler
 app.use(errorHandler);
 
 export default app;
