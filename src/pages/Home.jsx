@@ -24,7 +24,14 @@ const defaultEvents = [
     label: 'Community outreach',
     location: 'DHA Phase 8, Lahore',
     date: 'FOOD DRIVE',
-    image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=85',
+    image: '/events/food-drive/food-drive-1.jpg',
+    gallery: [
+      '/events/food-drive/food-drive-1.jpg',
+      '/events/food-drive/food-drive-2.jpg',
+      '/events/food-drive/food-drive-3.jpg',
+      '/events/food-drive/food-drive-4.jpg',
+      '/events/food-drive/food-drive-5.jpg',
+    ],
     description:
       'The Saagar Foundation successfully organized a food drive in DHA Phase 8, Lahore, providing meals to 100 people in need. This initiative reflects our commitment to serving humanity, spreading kindness, and ensuring that help reaches those who need it most.\n\nEvery meal served is a step toward our vision of building something meaningful that continues to grow, make a difference, and serve communities for generations to come. At Saagar Foundation, we believe that even the smallest act of kindness can create a lasting impact.',
   },

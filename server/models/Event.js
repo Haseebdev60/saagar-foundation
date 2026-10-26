@@ -38,6 +38,10 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Cover image URL is required'],
     },
+    gallery: {
+      type: [String],
+      default: [],
+    },
     description: {
       type: String,
       required: [true, 'Description is required'],

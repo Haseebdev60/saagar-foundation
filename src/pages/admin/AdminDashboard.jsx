@@ -229,6 +229,7 @@ export default function AdminDashboard() {
       location: event.location,
       date: event.date,
       image: event.image,
+      gallery: event.gallery || [],
       description: event.description,
       isPublished: event.isPublished,
       order: event.order || 0,

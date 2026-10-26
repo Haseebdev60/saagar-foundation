@@ -63,7 +63,7 @@ export const getAllEventsAdmin = async (req, res, next) => {
 // POST /api/events (Admin only)
 export const createEvent = async (req, res, next) => {
   try {
-    const { title, category, label, location, date, image, description, isPublished, order } = req.body;
+    const { title, category, label, location, date, image, gallery, description, isPublished, order } = req.body;
 
     if (!title || !location || !image || !description) {
       return res.status(400).json({
@@ -87,6 +87,7 @@ export const createEvent = async (req, res, next) => {
       location,
       date: date || 'UPCOMING',
       image,
+      gallery: Array.isArray(gallery) ? gallery : [],
       description,
       isPublished: isPublished !== undefined ? isPublished : true,
       order: order !== undefined ? Number(order) : 0,
@@ -102,7 +103,7 @@ export const createEvent = async (req, res, next) => {
 export const updateEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, category, label, location, date, image, description, isPublished, order, slug } = req.body;
+    const { title, category, label, location, date, image, gallery, description, isPublished, order, slug } = req.body;
 
     const event = await Event.findById(id);
     if (!event) {
@@ -121,6 +122,7 @@ export const updateEvent = async (req, res, next) => {
     if (location) event.location = location;
     if (date !== undefined) event.date = date;
     if (image) event.image = image;
+    if (gallery !== undefined) event.gallery = Array.isArray(gallery) ? gallery : [];
     if (description) event.description = description;
     if (isPublished !== undefined) event.isPublished = Boolean(isPublished);
     if (order !== undefined) event.order = Number(order);
