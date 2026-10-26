@@ -24,10 +24,13 @@ import {
   Check,
   AlertCircle,
   X,
+  Image as ImageIcon,
+  Star,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
+import { processMultipleImageFiles } from '../../utils/imageCompressor';
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -49,10 +52,13 @@ export default function AdminDashboard() {
     location: '',
     date: 'FOOD DRIVE',
     image: '',
+    gallery: [],
     description: '',
     isPublished: true,
     order: 0,
   });
+  const [galleryUrlInput, setGalleryUrlInput] = useState('');
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Submissions State
@@ -203,6 +209,73 @@ export default function AdminDashboard() {
     }
   };
 
+  // Gallery image actions
+  const handleMultipleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    try {
+      setUploadingGallery(true);
+      const newImages = await processMultipleImageFiles(files);
+      if (newImages.length > 0) {
+        setEventForm((prev) => {
+          const currentGallery = Array.isArray(prev.gallery) ? prev.gallery : [];
+          const updatedGallery = [...currentGallery, ...newImages];
+          const updatedCover = prev.image || updatedGallery[0] || '';
+          return {
+            ...prev,
+            gallery: updatedGallery,
+            image: updatedCover,
+          };
+        });
+      }
+    } catch (err) {
+      alert(`Error uploading images: ${err.message}`);
+    } finally {
+      setUploadingGallery(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleAddGalleryUrl = () => {
+    const trimmed = galleryUrlInput.trim();
+    if (!trimmed) return;
+    setEventForm((prev) => {
+      const currentGallery = Array.isArray(prev.gallery) ? prev.gallery : [];
+      const updatedGallery = [...currentGallery, trimmed];
+      const updatedCover = prev.image || trimmed;
+      return {
+        ...prev,
+        gallery: updatedGallery,
+        image: updatedCover,
+      };
+    });
+    setGalleryUrlInput('');
+  };
+
+  const handleRemoveGalleryImage = (idxToRemove) => {
+    setEventForm((prev) => {
+      const currentGallery = Array.isArray(prev.gallery) ? prev.gallery : [];
+      const imageToRemove = currentGallery[idxToRemove];
+      const updatedGallery = currentGallery.filter((_, idx) => idx !== idxToRemove);
+      let updatedCover = prev.image;
+      if (updatedCover === imageToRemove) {
+        updatedCover = updatedGallery[0] || '';
+      }
+      return {
+        ...prev,
+        gallery: updatedGallery,
+        image: updatedCover,
+      };
+    });
+  };
+
+  const handleSetCoverPhoto = (imgUrl) => {
+    setEventForm((prev) => ({
+      ...prev,
+      image: imgUrl,
+    }));
+  };
+
   // Event modal actions
   const openCreateEventModal = () => {
     setEditingEvent(null);
@@ -213,37 +286,58 @@ export default function AdminDashboard() {
       location: 'Lahore, Pakistan',
       date: 'UPCOMING',
       image: '',
+      gallery: [],
       description: '',
       isPublished: true,
       order: events.length + 1,
     });
+    setGalleryUrlInput('');
     setEventModalOpen(true);
   };
 
   const openEditEventModal = (event) => {
     setEditingEvent(event);
+    const gallery = Array.isArray(event.gallery) && event.gallery.length > 0
+      ? [...event.gallery]
+      : (event.image ? [event.image] : []);
     setEventForm({
       title: event.title,
       category: event.category,
       label: event.label,
       location: event.location,
       date: event.date,
-      image: event.image,
-      gallery: event.gallery || [],
+      image: event.image || (gallery[0] || ''),
+      gallery: gallery,
       description: event.description,
       isPublished: event.isPublished,
       order: event.order || 0,
     });
+    setGalleryUrlInput('');
     setEventModalOpen(true);
   };
 
   const handleSaveEvent = async (e) => {
     e.preventDefault();
     try {
+      const finalImage = eventForm.image || (eventForm.gallery && eventForm.gallery[0]) || '';
+      if (!finalImage) {
+        alert('Please add at least one picture for this event.');
+        return;
+      }
+      const finalGallery = (eventForm.gallery && eventForm.gallery.length > 0)
+        ? eventForm.gallery
+        : [finalImage];
+
+      const payload = {
+        ...eventForm,
+        image: finalImage,
+        gallery: finalGallery,
+      };
+
       if (editingEvent) {
-        await api.updateEvent(editingEvent._id, eventForm);
+        await api.updateEvent(editingEvent._id, payload);
       } else {
-        await api.createEvent(eventForm);
+        await api.createEvent(payload);
       }
       setEventModalOpen(false);
       loadEvents();
@@ -1477,39 +1571,220 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Cover Image URL *</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      type="text"
-                      required
-                      value={eventForm.image}
-                      onChange={(e) => setEventForm({ ...eventForm, image: e.target.value })}
-                      placeholder="https://... or upload local file"
-                      style={{ flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '13px' }}
-                    />
+                {/* MULTIPLE EVENT PHOTOS & GALLERY MANAGEMENT */}
+                <div
+                  style={{
+                    marginBottom: '20px',
+                    background: '#faf8f2',
+                    padding: '16px',
+                    borderRadius: '10px',
+                    border: '1px solid #ebd8a7',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#071020', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ImageIcon size={16} style={{ color: '#bd9636' }} />
+                      Event Photos & Gallery ({eventForm.gallery?.length || 0}) *
+                    </label>
+                    <span style={{ fontSize: '11px', color: '#666' }}>
+                      Select photos to show in the page gallery
+                    </span>
+                  </div>
+
+                  {/* Actions: Multiple Upload Button + URL Input */}
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
                     <label
                       style={{
-                        padding: '10px 14px',
-                        background: '#071020',
-                        color: '#fff',
-                        borderRadius: '6px',
-                        fontSize: '11px',
-                        cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px',
+                        background: '#071020',
+                        color: '#efc75e',
+                        padding: '9px 15px',
+                        borderRadius: '6px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        cursor: uploadingGallery ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                        opacity: uploadingGallery ? 0.7 : 1,
+                        flexShrink: 0,
                       }}
                     >
-                      <Upload size={13} /> {uploadingImage ? '...' : 'Upload'}
+                      {uploadingGallery ? (
+                        <>
+                          <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                          Adding Photos...
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={13} /> Upload Multiple Pictures
+                        </>
+                      )}
                       <input
                         type="file"
+                        multiple
                         accept="image/*"
+                        disabled={uploadingGallery}
                         style={{ display: 'none' }}
-                        onChange={(e) => handleFileUpload(e, 'event')}
+                        onChange={handleMultipleImageUpload}
                       />
                     </label>
+
+                    <div style={{ display: 'flex', gap: '6px', flex: 1, minWidth: '200px' }}>
+                      <input
+                        type="text"
+                        placeholder="Or paste photo URL..."
+                        value={galleryUrlInput}
+                        onChange={(e) => setGalleryUrlInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddGalleryUrl();
+                          }
+                        }}
+                        style={{ flex: 1, padding: '8px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '12px', background: '#fff' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddGalleryUrl}
+                        style={{
+                          background: '#ebd8a7',
+                          color: '#071020',
+                          border: '1px solid #d4be88',
+                          padding: '0 12px',
+                          borderRadius: '6px',
+                          fontSize: '11.5px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          flexShrink: 0,
+                        }}
+                      >
+                        Add URL
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Thumbnail Previews Grid */}
+                  {eventForm.gallery && eventForm.gallery.length > 0 ? (
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+                        gap: '10px',
+                        maxHeight: '260px',
+                        overflowY: 'auto',
+                        padding: '4px 2px',
+                      }}
+                    >
+                      {eventForm.gallery.map((imgUrl, idx) => {
+                        const isCover = eventForm.image === imgUrl || (!eventForm.image && idx === 0);
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              position: 'relative',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              height: '84px',
+                              border: isCover ? '2.5px solid #efc75e' : '1px solid #ddd',
+                              boxShadow: isCover ? '0 0 10px rgba(239, 199, 94, 0.45)' : 'none',
+                              background: '#040810',
+                            }}
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`Event photo ${idx + 1}`}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            />
+
+                            {/* Cover Badge or Set as Cover Button */}
+                            {isCover ? (
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  top: '4px',
+                                  left: '4px',
+                                  background: '#efc75e',
+                                  color: '#071020',
+                                  fontSize: '8.5px',
+                                  fontWeight: 900,
+                                  padding: '2px 5px',
+                                  borderRadius: '3px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '2px',
+                                }}
+                              >
+                                <Star size={9} fill="#071020" /> COVER
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleSetCoverPhoto(imgUrl)}
+                                title="Make this the cover photo"
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '4px',
+                                  left: '4px',
+                                  background: 'rgba(7, 16, 32, 0.85)',
+                                  color: '#efc75e',
+                                  border: 0,
+                                  fontSize: '8.5px',
+                                  fontWeight: 700,
+                                  padding: '2px 5px',
+                                  borderRadius: '3px',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Set Cover
+                              </button>
+                            )}
+
+                            {/* Delete Button */}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveGalleryImage(idx)}
+                              title="Delete this picture"
+                              style={{
+                                position: 'absolute',
+                                top: '4px',
+                                right: '4px',
+                                background: 'rgba(217, 56, 58, 0.95)',
+                                color: '#fff',
+                                border: 0,
+                                width: '22px',
+                                height: '22px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'transform 0.15s',
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.15)')}
+                              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        textAlign: 'center',
+                        padding: '18px 12px',
+                        background: '#fff',
+                        borderRadius: '6px',
+                        border: '1px dashed #d5d5d5',
+                        color: '#666',
+                        fontSize: '12px',
+                      }}
+                    >
+                      No pictures added yet. Click <strong>Upload Multiple Pictures</strong> or paste an image URL to add photos.
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ marginBottom: '18px' }}>

@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Founder from './pages/Founder';
 import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
 import Donate from './pages/Donate';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
@@ -30,7 +31,8 @@ function AppLayout() {
           <Route path="/about" element={<About />} />
           <Route path="/founder" element={<Founder />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/events/:idOrSlug" element={<Events />} />
+          <Route path="/events/:idOrSlug" element={<EventDetail />} />
+          <Route path="/event/:idOrSlug" element={<EventDetail />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin/login" element={<AdminLogin />} />
