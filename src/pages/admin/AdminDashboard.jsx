@@ -30,7 +30,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
-import { processMultipleImageFiles } from '../../utils/imageCompressor';
+import { processMultipleImageFiles, optimizeGalleryForSave } from '../../utils/imageCompressor';
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -59,6 +59,8 @@ export default function AdminDashboard() {
   });
   const [galleryUrlInput, setGalleryUrlInput] = useState('');
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [savingEvent, setSavingEvent] = useState(false);
+  const [eventSaveError, setEventSaveError] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Submissions State
@@ -279,6 +281,8 @@ export default function AdminDashboard() {
   // Event modal actions
   const openCreateEventModal = () => {
     setEditingEvent(null);
+    setEventSaveError('');
+    setSavingEvent(false);
     setEventForm({
       title: '',
       category: 'Community',
@@ -297,6 +301,8 @@ export default function AdminDashboard() {
 
   const openEditEventModal = (event) => {
     setEditingEvent(event);
+    setEventSaveError('');
+    setSavingEvent(false);
     const gallery = Array.isArray(event.gallery) && event.gallery.length > 0
       ? [...event.gallery]
       : (event.image ? [event.image] : []);
@@ -318,32 +324,66 @@ export default function AdminDashboard() {
 
   const handleSaveEvent = async (e) => {
     e.preventDefault();
+    setEventSaveError('');
     try {
+      setSavingEvent(true);
+
       const finalImage = eventForm.image || (eventForm.gallery && eventForm.gallery[0]) || '';
       if (!finalImage) {
-        alert('Please add at least one picture for this event.');
+        setEventSaveError('Please add at least one picture for this event.');
+        setSavingEvent(false);
         return;
       }
-      const finalGallery = (eventForm.gallery && eventForm.gallery.length > 0)
+
+      // Optimize all gallery photos before saving to stay under cloud limit
+      const rawGallery = (eventForm.gallery && eventForm.gallery.length > 0)
         ? eventForm.gallery
         : [finalImage];
 
+      const finalGallery = await optimizeGalleryForSave(rawGallery);
+      const finalCover = finalImage.startsWith('data:image/')
+        ? (await optimizeGalleryForSave([finalImage]))[0]
+        : finalImage;
+
       const payload = {
         ...eventForm,
-        image: finalImage,
+        image: finalCover,
         gallery: finalGallery,
       };
+
+      // Guard check: ensure request size doesn't exceed 4.1MB
+      const payloadStr = JSON.stringify(payload);
+      const totalBytes = new Blob([payloadStr]).size;
+      const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+
+      if (totalBytes > 4.1 * 1024 * 1024) {
+        setEventSaveError(`Total photo size (${totalMB} MB) exceeds serverless limit (4.1 MB). Please remove 1 or 2 photos.`);
+        setSavingEvent(false);
+        return;
+      }
 
       if (editingEvent) {
         await api.updateEvent(editingEvent._id, payload);
       } else {
         await api.createEvent(payload);
       }
+
       setEventModalOpen(false);
+      setActionToast('Event saved successfully!');
+      setTimeout(() => setActionToast(''), 4000);
       loadEvents();
       loadStats();
     } catch (err) {
-      alert(`Error saving event: ${err.message}`);
+      console.error('Error saving event:', err);
+      let msg = err.message || 'Unknown error occurred while saving.';
+      if (msg.includes('413') || msg.includes('Too Large')) {
+        msg = 'Total photo size is too large for cloud hosting. Please delete 1 or 2 photos.';
+      } else if (msg.includes('401') || msg.includes('Not authorized') || msg.includes('token')) {
+        msg = 'Your session has expired. Please log in again to save changes.';
+      }
+      setEventSaveError(msg);
+    } finally {
+      setSavingEvent(false);
     }
   };
 
@@ -1811,16 +1851,58 @@ export default function AdminDashboard() {
                   </label>
                 </div>
 
+                {/* Save Error Notice */}
+                {eventSaveError && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '12px 14px',
+                      background: '#fdf2f2',
+                      borderLeft: '4px solid #d9383a',
+                      color: '#981b1d',
+                      fontSize: '12.5px',
+                      marginBottom: '16px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                    <span>{eventSaveError}</span>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                   <button
                     type="button"
+                    disabled={savingEvent}
                     onClick={() => setEventModalOpen(false)}
                     style={{ padding: '10px 16px', background: '#eee', border: 0, borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="button button-gold" style={{ padding: '10px 20px', fontSize: '12px' }}>
-                    {editingEvent ? 'Save Changes' : 'Create Event'}
+                  <button
+                    type="submit"
+                    disabled={savingEvent || uploadingGallery}
+                    className="button button-gold"
+                    style={{
+                      padding: '10px 22px',
+                      fontSize: '12px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: (savingEvent || uploadingGallery) ? 'not-allowed' : 'pointer',
+                      opacity: (savingEvent || uploadingGallery) ? 0.7 : 1,
+                    }}
+                  >
+                    {savingEvent ? (
+                      <>
+                        <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                        Saving Changes...
+                      </>
+                    ) : (
+                      editingEvent ? 'Save Changes' : 'Create Event'
+                    )}
                   </button>
                 </div>
               </form>
