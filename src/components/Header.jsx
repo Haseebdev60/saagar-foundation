@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { ArrowUpRight, Menu, X, Shield } from 'lucide-react';
+import { ArrowUpRight, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/saagar-logo.jpg';
-import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
 
   const close = () => setOpen(false);
 
@@ -26,11 +24,6 @@ export default function Header() {
       <div className="announcement">
         <span>PEOPLE FIRST. KINDNESS ALWAYS.</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-          {user && (
-            <Link to="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#efc75e' }}>
-              <Shield size={11} /> Admin Panel
-            </Link>
-          )}
           <a href="mailto:Saagarwelfarefoundation@gmail.com" target="_blank" rel="noreferrer">
             Saagarwelfarefoundation@gmail.com <ArrowUpRight size={13} />
           </a>
@@ -129,23 +122,6 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
-              {user && (
-                <Link
-                  to="/admin"
-                  onClick={close}
-                  style={{
-                    color: '#efc75e',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    padding: '8px 0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <Shield size={14} /> Admin Dashboard
-                </Link>
-              )}
               <Link className="nav-cta" to="/donate" onClick={close} style={{ marginTop: '8px' }}>
                 Donate Now <ArrowUpRight size={15} />
               </Link>

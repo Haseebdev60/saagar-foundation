@@ -1,12 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Heart, Shield } from 'lucide-react';
+import { ArrowUpRight, Heart } from 'lucide-react';
 import logo from '../assets/saagar-logo.jpg';
-import { useAuth } from '../context/AuthContext';
 
 export default function Footer() {
-  const { user } = useAuth();
-
   const scrollToTop = (e) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -53,15 +50,6 @@ export default function Footer() {
           >
             Direct WhatsApp Chat <ArrowUpRight size={14} />
           </a>
-          {user ? (
-            <Link to="/admin" style={{ color: '#efc75e', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Shield size={13} /> Admin Portal
-            </Link>
-          ) : (
-            <Link to="/admin/login" style={{ color: '#858995', marginTop: '6px', fontSize: '9px' }}>
-              Staff Access
-            </Link>
-          )}
           <a className="back-top" href="#top" onClick={scrollToTop}>
             Back to top <ArrowUpRight size={15} />
           </a>

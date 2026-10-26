@@ -246,7 +246,7 @@ export default function ContactFormSection({ fullPage = false }) {
           </button>
 
           <p className="form-disclaimer">
-            Your inquiry is stored securely and viewed only by authorized Saagar Foundation administrators.
+            Your inquiry is stored securely and viewed only by the Saagar Foundation team.
           </p>
         </form>
       </div>
@@ -332,7 +332,7 @@ export default function ContactFormSection({ fullPage = false }) {
 
               <p style={{ fontSize: '13px', lineHeight: 1.8, color: '#d1d5df', margin: '0 0 28px' }}>
                 Your message has been received with care. It has been delivered directly to the Saagar Foundation
-                administration portal, and our team will get in touch with you shortly.
+                team, and we will get in touch with you shortly.
               </p>
 
               <button
