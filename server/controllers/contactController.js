@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { ContactSubmission } from '../models/ContactSubmission.js';
 
 // POST /api/contact (Public)
@@ -5,16 +6,37 @@ export const submitContact = async (req, res, next) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
-    if (!name || !email || !message) {
+    if (
+      !name ||
+      typeof name !== 'string' ||
+      !email ||
+      typeof email !== 'string' ||
+      !message ||
+      typeof message !== 'string'
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'Name, email, and message are required fields.',
+        message: 'Name, email, and message must be valid text strings.',
+      });
+    }
+
+    if (name.trim().length === 0 || name.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name is required and cannot exceed 100 characters.',
+      });
+    }
+
+    if (message.trim().length === 0 || message.length > 2500) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message cannot be empty and cannot exceed 2500 characters.',
       });
     }
 
     // Basic email check
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email.trim()) || email.length > 150) {
       return res.status(400).json({
         success: false,
         message: 'Please provide a valid email address.',
@@ -26,10 +48,10 @@ export const submitContact = async (req, res, next) => {
     const submission = await ContactSubmission.create({
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      phone: phone ? phone.trim() : '',
-      subject: subject ? subject.trim() : 'General Inquiry',
+      phone: typeof phone === 'string' ? phone.trim().slice(0, 30) : '',
+      subject: typeof subject === 'string' && subject.trim() ? subject.trim().slice(0, 150) : 'General Inquiry',
       message: message.trim(),
-      ipAddress: String(ipAddress),
+      ipAddress: String(ipAddress).slice(0, 50),
       status: 'unread',
     });
 
@@ -63,6 +85,9 @@ export const getSubmissionsAdmin = async (req, res, next) => {
 export const updateSubmissionStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid submission ID format.' });
+    }
     const { status, adminNotes } = req.body;
 
     const submission = await ContactSubmission.findById(id);
@@ -84,6 +109,9 @@ export const updateSubmissionStatus = async (req, res, next) => {
 export const deleteSubmission = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid submission ID format.' });
+    }
     const submission = await ContactSubmission.findByIdAndDelete(id);
     if (!submission) {
       return res.status(404).json({ success: false, message: 'Submission not found.' });

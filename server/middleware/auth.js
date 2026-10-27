@@ -15,7 +15,10 @@ export const protectAdmin = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Authentication required. Please log in.' });
     }
 
-    const secret = process.env.JWT_SECRET || 'saagar_foundation_secret_key_2026_secure_jwt';
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ success: false, message: 'Server authentication configuration error.' });
+    }
     const decoded = jwt.verify(token, secret);
 
     const user = await User.findById(decoded.id).select('-password');

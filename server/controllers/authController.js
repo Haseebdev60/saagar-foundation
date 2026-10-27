@@ -4,15 +4,18 @@ import { Event } from '../models/Event.js';
 import { ContactSubmission } from '../models/ContactSubmission.js';
 
 const generateToken = (id) => {
-  const secret = process.env.JWT_SECRET || 'saagar_foundation_secret_key_2026_secure_jwt';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not configured. Cannot issue tokens.');
+  }
   return jwt.sign({ id }, secret, { expiresIn: '7d' });
 };
 
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Please provide both email and password.' });
+    if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
+      return res.status(400).json({ success: false, message: 'Please provide valid email and password strings.' });
     }
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
@@ -27,18 +30,19 @@ export const login = async (req, res, next) => {
 
     const token = generateToken(user._id);
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     // Set secure HTTP-only cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.status(200).json({
       success: true,
       message: 'Logged in successfully.',
-      token,
       user: {
         id: user._id,
         name: user.name,

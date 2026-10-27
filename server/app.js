@@ -34,9 +34,24 @@ app.use(
   })
 );
 
+// Allowed origins for CORS — restrict to known domains
+const ALLOWED_ORIGINS = [
+  'https://saagar-contact-work.vercel.app',
+  'https://saagarfoundation.org',
+  'https://www.saagarfoundation.org',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: (origin, callback) => callback(null, true),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (server-to-server, curl, mobile apps)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.some((allowed) => origin === allowed || origin.endsWith('.vercel.app'))) {
+        return callback(null, true);
+      }
+      callback(new Error('CORS: Origin not allowed'));
+    },
     credentials: true,
   })
 );
@@ -83,9 +98,11 @@ apiRouter.use('/donation-info', donationRoutes);
 apiRouter.use('/founder-info', founderRoutes);
 apiRouter.use('/upload', uploadRoutes);
 
-// Mount on both /api and root so serverless requests always match
+// Mount API routes under /api prefix only
 app.use('/api', apiRouter);
-app.use('/', apiRouter);
+
+// For Vercel serverless: requests rewritten to /api already match above
+// No longer exposing routes on root / to prevent unintended access
 
 // Central error handler
 app.use(errorHandler);

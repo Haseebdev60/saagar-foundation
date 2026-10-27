@@ -95,20 +95,24 @@ export const seedDatabase = async () => {
   await mongoose.connect(uri);
 
   // 1. Admin User
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@saagarfoundation.org';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'SaagarAdmin2026!';
-  const existingAdmin = await User.findOne({ email: adminEmail.toLowerCase() });
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (!existingAdmin) {
-    await User.create({
-      name: 'Saagar Administrator',
-      email: adminEmail.toLowerCase(),
-      password: adminPassword,
-      role: 'admin',
-    });
-    console.log(`[Seed] Created initial administrator: ${adminEmail}`);
+  if (!adminEmail || !adminPassword) {
+    console.log('[Seed] Notice: ADMIN_EMAIL or ADMIN_PASSWORD not configured in environment. Skipping admin seeding.');
   } else {
-    console.log(`[Seed] Admin user already exists: ${adminEmail}`);
+    const existingAdmin = await User.findOne({ email: adminEmail.toLowerCase() });
+    if (!existingAdmin) {
+      await User.create({
+        name: 'Saagar Administrator',
+        email: adminEmail.toLowerCase(),
+        password: adminPassword,
+        role: 'admin',
+      });
+      console.log(`[Seed] Created initial administrator: ${adminEmail}`);
+    } else {
+      console.log(`[Seed] Admin user already exists: ${adminEmail}`);
+    }
   }
 
   // 2. Events

@@ -111,9 +111,9 @@ Create a `.env` file in the project root (a sample is provided in `.env.example`
 ```env
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/saagar_foundation
-JWT_SECRET=saagar_foundation_secret_key_2026_secure_jwt
+JWT_SECRET=your_super_secret_jwt_key_here_min_32_chars
 ADMIN_EMAIL=admin@saagarfoundation.org
-ADMIN_PASSWORD=SaagarAdmin2026!
+ADMIN_PASSWORD=your_secure_admin_password_here
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
 ```
@@ -143,11 +143,11 @@ npm run client
 
 ---
 
-## 4. Default Administrator Credentials
+## 4. Administrator Access
 
-- **URL**: [http://localhost:5173/admin/login](http://localhost:5173/admin/login)
-- **Email**: `admin@saagarfoundation.org`
-- **Password**: `SaagarAdmin2026!` *(Change this in production)*
+- **URL**: `/admin/login`
+- **Email**: Set via `ADMIN_EMAIL` environment variable
+- **Password**: Set via `ADMIN_PASSWORD` environment variable (must be changed and kept confidential)
 
 ---
 

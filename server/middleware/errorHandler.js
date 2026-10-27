@@ -5,11 +5,17 @@ export const notFound = (req, res, next) => {
 };
 
 export const errorHandler = (err, req, res, next) => {
+  const isDev = process.env.NODE_ENV === 'development';
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  console.error(`[Error] ${err.message}`, err.stack);
+  console.error(`[Error] ${err.message}`);
+
+  const clientMessage = (statusCode === 500 && !isDev)
+    ? 'Internal server error. Please try again later.'
+    : (err.message || 'Internal Server Error');
+
   res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    message: clientMessage,
+    ...(isDev && { stack: err.stack }),
   });
 };

@@ -3,13 +3,9 @@
 const BASE_URL = '/api';
 
 function getAuthHeaders(includeContentType = true) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('saagar_auth_token') : null;
   const headers = {};
   if (includeContentType) {
     headers['Content-Type'] = 'application/json';
-  }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
   }
   return headers;
 }
@@ -161,9 +157,6 @@ export const api = {
         body: JSON.stringify(credentials),
       })
     );
-    if (res.token) {
-      localStorage.setItem('saagar_auth_token', res.token);
-    }
     return res;
   },
 
@@ -171,12 +164,9 @@ export const api = {
     try {
       await fetch(`${BASE_URL}/auth/logout`, {
         method: 'POST',
-        headers: getAuthHeaders(false),
         credentials: 'include',
       });
-    } finally {
-      localStorage.removeItem('saagar_auth_token');
-    }
+    } catch {}
     return { success: true };
   },
 

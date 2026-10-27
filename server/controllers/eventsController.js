@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Event } from '../models/Event.js';
 
 const slugify = (text) => {
@@ -131,6 +132,10 @@ export const createEvent = async (req, res, next) => {
 export const updateEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid event ID format.' });
+    }
+
     const { title, category, label, location, date, image, gallery, description, isPublished, order, slug } = req.body;
 
     const event = await Event.findById(id);
@@ -167,6 +172,9 @@ export const updateEvent = async (req, res, next) => {
 export const deleteEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid event ID format.' });
+    }
     const event = await Event.findByIdAndDelete(id);
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found.' });
