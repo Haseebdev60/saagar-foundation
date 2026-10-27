@@ -300,6 +300,11 @@ export default function EventDetail() {
             key={activePhoto}
             src={activePhoto}
             alt={`${event?.title} - photo ${activeIdx + 1}`}
+            loading="eager"
+            decoding="async"
+            onError={(err) => {
+              err.currentTarget.src = '/events/food-drive/food-drive-1.jpg';
+            }}
             style={{
               width: '100%',
               height: '100%',
@@ -456,6 +461,11 @@ export default function EventDetail() {
                   <img
                     src={imgUrl}
                     alt={`Thumbnail ${idx + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(err) => {
+                      err.currentTarget.src = '/events/food-drive/food-drive-1.jpg';
+                    }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                   {isActive && (
@@ -690,6 +700,10 @@ export default function EventDetail() {
                       src={oe.image}
                       alt={oe.title}
                       loading="lazy"
+                      decoding="async"
+                      onError={(err) => {
+                        err.currentTarget.src = '/events/food-drive/food-drive-1.jpg';
+                      }}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </div>
@@ -773,6 +787,11 @@ export default function EventDetail() {
             <img
               src={activePhoto}
               alt={event?.title}
+              loading="eager"
+              decoding="async"
+              onError={(err) => {
+                err.currentTarget.src = '/events/food-drive/food-drive-1.jpg';
+              }}
               onClick={(e) => e.stopPropagation()}
               style={{
                 maxWidth: '90vw',

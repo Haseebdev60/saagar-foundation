@@ -11,10 +11,13 @@ export const connectDB = async () => {
     return cached.conn;
   }
 
-  const uri = process.env.MONGODB_URI;
+  let uri = process.env.MONGODB_URI;
   if (!uri) {
     throw new Error('MONGODB_URI is missing from environment');
   }
+
+  // Remove compressors=zlib to prevent severe 40s+ socket stalls on MongoDB Atlas
+  uri = uri.replace(/([?&])compressors=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
 
   if (!cached.promise) {
     const opts = {

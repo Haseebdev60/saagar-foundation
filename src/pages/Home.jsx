@@ -251,7 +251,15 @@ export default function Home() {
                   aria-label={`Read ${e.title}`}
                   style={{ display: 'block', textDecoration: 'none' }}
                 >
-                  <img src={e.image} alt={e.title} loading="lazy" />
+                  <img
+                    src={e.image}
+                    alt={e.title}
+                    loading={i < 3 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    onError={(err) => {
+                      err.currentTarget.src = '/events/food-drive/food-drive-1.jpg';
+                    }}
+                  />
                   <span className="image-arrow">
                     <ArrowUpRight size={19} />
                   </span>
