@@ -88,7 +88,7 @@ export default function About() {
 
           <div style={{ marginTop: '36px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Link to="/founder" className="button button-gold">
-              Meet Founder Memoona <ArrowRight size={16} />
+              Meet Founder Memoona Ahmad <ArrowRight size={16} />
             </Link>
             <Link to="/events" className="button button-dark">
               See Stories in Action <ArrowRight size={16} />

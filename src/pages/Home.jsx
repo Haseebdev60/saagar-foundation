@@ -298,7 +298,13 @@ export default function Home() {
       <section id="founder" className="founder-section">
         <div className="founder-visual">
           <div className="founder-frame">
-            <img className="founder-portrait-image" src={memoonaPortrait} alt="Memoona, founder of Saagar Foundation" />
+            <img
+              className="founder-portrait-image"
+              src={memoonaPortrait}
+              alt="Memoona Ahmad, founder of Saagar Foundation"
+              loading="lazy"
+              decoding="async"
+            />
             <span className="founder-frame-label">
               SAAGAR FOUNDATION <span>✳</span>
             </span>
@@ -309,43 +315,39 @@ export default function Home() {
           <span className="eyebrow">
             <span className="eyebrow-line"></span> THE PERSON BEHIND THE PURPOSE
           </span>
-          <p className="founder-overline">FOUNDER, SAAGAR FOUNDATION</p>
+          <p className="founder-overline">FOUNDER & VISIONARY</p>
           <h2>
-            Meet <em>Memoona.</em>
+            Meet <em>Memoona Ahmad.</em>
           </h2>
-          <p className="founder-intro">
-            The foundation’s work is guided by a commitment to compassion, kindness, and service to humanity.
-          </p>
 
-          <div className="founder-values">
-            <article className="founder-value">
-              <div className="founder-value-top">
-                <span>01 / OUR MISSION</span>
-                <Heart size={17} />
-              </div>
-              <h3>Help, without hesitation.</h3>
-              <p>
-                The mission of the Saagar Foundation is to help anyone in need, regardless of their circumstances, by
-                providing support, resources, and assistance in whatever ways possible.
-              </p>
-            </article>
-
-            <article className="founder-value">
-              <div className="founder-value-top">
-                <span>02 / OUR VISION</span>
-                <Sparkles size={17} />
-              </div>
-              <h3>A legacy that lasts.</h3>
-              <p>
-                The vision of the Saagar Foundation is to build something meaningful and lasting—an organization that
-                continues to grow, serve, and make a difference for generations to come.
-              </p>
-            </article>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px',
+              margin: '22px 0 28px',
+              color: '#334155',
+              fontSize: '15.5px',
+              lineHeight: '1.85',
+            }}
+          >
+            <p style={{ margin: 0, fontWeight: 500, color: '#1e293b' }}>
+              At just 17 years old, Memoona Ahmad had a simple yet life-changing realization: people around her needed help, and someone had to step forward. Instead of waiting for someone else to make a difference, she founded Saagar Foundation, turning compassion into action.
+            </p>
+            <p style={{ margin: 0 }}>
+              Deeply patriotic, her love for Pakistan is at the heart of everything she does. Guided by Quaid-e-Azam Muhammad Ali Jinnah’s words—<em>"With faith, discipline and selfless devotion to duty, there is nothing worthwhile that you cannot achieve"</em>—she dreams of seeing Pakistan become a nation built on unity, justice, discipline, and equal opportunities for all.
+            </p>
+            <p style={{ margin: 0 }}>
+              For Memoona Ahmad, Saagar Foundation is only the beginning. Her journey is fueled by faith, guided by discipline, and driven by a dream of a stronger, more compassionate, and more united Pakistan.
+            </p>
           </div>
 
-          <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ marginTop: '28px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <Link className="button button-gold" to="/founder">
-              Read Founder’s Profile <ArrowRight size={16} />
+              Read Founder’s Full Story <ArrowRight size={16} />
+            </Link>
+            <Link className="button button-dark" to="/events">
+              Explore Our Work <ArrowRight size={16} />
             </Link>
           </div>
         </div>
