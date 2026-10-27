@@ -19,7 +19,7 @@ const categories = ['All Stories', 'Community', 'Fundraising', 'Sports', 'Outrea
 
 const getCachedEvents = () => {
   try {
-    const cached = localStorage.getItem('saagar_cached_events');
+    const cached = localStorage.getItem('saagar_cached_events_v2');
     if (cached) {
       const parsed = JSON.parse(cached);
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -42,7 +42,7 @@ export default function Home() {
         if (isMounted && res.success && res.data && res.data.length > 0) {
           setEvents(res.data);
           try {
-            localStorage.setItem('saagar_cached_events', JSON.stringify(res.data));
+            localStorage.setItem('saagar_cached_events_v2', JSON.stringify(res.data));
           } catch {}
         }
       })

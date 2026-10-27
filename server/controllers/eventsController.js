@@ -10,20 +10,41 @@ const slugify = (text) => {
     .replace(/--+/g, '-');
 };
 
+// In-memory cache for ultra-fast instant responses on mobile and desktop
+let memoryEventsCache = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 60 * 1000;
+
+export const invalidateEventsCache = () => {
+  memoryEventsCache = null;
+  lastCacheTime = 0;
+};
+
 // GET /api/events (Public)
 export const getPublishedEvents = async (req, res, next) => {
   try {
     const { category } = req.query;
-    const filter = { isPublished: true };
-    if (category && category !== 'All Stories' && category !== 'All') {
-      filter.category = category;
+
+    // Set Edge & Browser Caching headers (300s edge CDN cache, stale-while-revalidate)
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+
+    const now = Date.now();
+    let allPublished = memoryEventsCache;
+    if (!allPublished || now - lastCacheTime > CACHE_TTL_MS) {
+      allPublished = await Event.find({ isPublished: true })
+        .select('-gallery')
+        .sort({ order: 1, createdAt: -1 })
+        .lean();
+      memoryEventsCache = allPublished;
+      lastCacheTime = now;
     }
 
-    // Exclude heavy gallery arrays from public listing for super-fast page loads
-    const events = await Event.find(filter)
-      .select('-gallery')
-      .sort({ order: 1, createdAt: -1 });
-    res.status(200).json({ success: true, count: events.length, data: events });
+    let filtered = allPublished;
+    if (category && category !== 'All Stories' && category !== 'All') {
+      filtered = allPublished.filter((e) => e.category === category);
+    }
+
+    res.status(200).json({ success: true, count: filtered.length, data: filtered });
   } catch (error) {
     next(error);
   }
@@ -99,6 +120,7 @@ export const createEvent = async (req, res, next) => {
       order: order !== undefined ? Number(order) : 0,
     });
 
+    invalidateEventsCache();
     res.status(201).json({ success: true, message: 'Event created successfully.', data: event });
   } catch (error) {
     next(error);
@@ -134,6 +156,7 @@ export const updateEvent = async (req, res, next) => {
     if (order !== undefined) event.order = Number(order);
 
     await event.save();
+    invalidateEventsCache();
     res.status(200).json({ success: true, message: 'Event updated successfully.', data: event });
   } catch (error) {
     next(error);
@@ -148,6 +171,7 @@ export const deleteEvent = async (req, res, next) => {
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found.' });
     }
+    invalidateEventsCache();
     res.status(200).json({ success: true, message: 'Event deleted successfully.' });
   } catch (error) {
     next(error);

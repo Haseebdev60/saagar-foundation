@@ -32,7 +32,7 @@ export default function EventDetail() {
 
   const getInitialEvent = () => {
     try {
-      const cached = localStorage.getItem('saagar_cached_events');
+      const cached = localStorage.getItem('saagar_cached_events_v2');
       if (cached) {
         const list = JSON.parse(cached);
         const match = list.find(
@@ -96,18 +96,18 @@ export default function EventDetail() {
     if (event?.gallery && Array.isArray(event.gallery) && event.gallery.length > 0) {
       return event.gallery;
     }
-    // Hardcoded fallback for food drive
-    if (event?.slug === 'saagar-foundation-food-drive' || event?.title?.includes('Food Drive')) {
-      return [
-        '/events/food-drive/food-drive-1.jpg',
-        '/events/food-drive/food-drive-2.jpg',
-        '/events/food-drive/food-drive-3.jpg',
-        '/events/food-drive/food-drive-4.jpg',
-        '/events/food-drive/food-drive-5.jpg',
-      ];
+    const defaultMatch = defaultEvents.find(
+      (e) =>
+        e.slug === event?.slug ||
+        e.title === event?.title ||
+        e._id === idOrSlug ||
+        String(e.id) === idOrSlug
+    );
+    if (defaultMatch?.gallery && defaultMatch.gallery.length > 0) {
+      return defaultMatch.gallery;
     }
     return event?.image ? [event.image] : [];
-  }, [event]);
+  }, [event, idOrSlug]);
 
   // Handle keyboard arrow navigation
   useEffect(() => {
