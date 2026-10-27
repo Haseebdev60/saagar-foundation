@@ -127,12 +127,19 @@ export default function AdminDashboard() {
   const loadEvents = async () => {
     try {
       setLoadingEvents(true);
-      const res = await api.getAllEventsAdmin();
-      if (res.success && res.data) {
+      // Fetch events with fallback to public endpoint if admin token is refreshing
+      let res = await api.getAllEventsAdmin().catch(() => null);
+      if (!res || !res.success || !res.data) {
+        res = await api.getEvents().catch(() => null);
+      }
+      if (res && res.success && res.data && res.data.length > 0) {
         setEvents(res.data);
+        try {
+          localStorage.setItem('saagar_cached_events', JSON.stringify(res.data));
+        } catch {}
       }
     } catch (e) {
-      console.error(e);
+      console.error('Failed to load events:', e);
     } finally {
       setLoadingEvents(false);
     }
@@ -299,27 +306,52 @@ export default function AdminDashboard() {
     setEventModalOpen(true);
   };
 
-  const openEditEventModal = (event) => {
+  const openEditEventModal = async (event) => {
     setEditingEvent(event);
     setEventSaveError('');
     setSavingEvent(false);
-    const gallery = Array.isArray(event.gallery) && event.gallery.length > 0
-      ? [...event.gallery]
-      : (event.image ? [event.image] : []);
+    setGalleryUrlInput('');
+
+    // Pre-populate with table row data
+    const initialGallery = event.image ? [event.image] : [];
     setEventForm({
-      title: event.title,
-      category: event.category,
-      label: event.label,
-      location: event.location,
-      date: event.date,
-      image: event.image || (gallery[0] || ''),
-      gallery: gallery,
-      description: event.description,
-      isPublished: event.isPublished,
+      title: event.title || '',
+      category: event.category || 'Community',
+      label: event.label || '',
+      location: event.location || '',
+      date: event.date || 'UPCOMING',
+      image: event.image || '',
+      gallery: initialGallery,
+      description: event.description || '',
+      isPublished: event.isPublished !== undefined ? event.isPublished : true,
       order: event.order || 0,
     });
-    setGalleryUrlInput('');
     setEventModalOpen(true);
+
+    // Fetch full event detail with complete gallery
+    try {
+      const fullRes = await api.getEventByIdOrSlug(event.slug || event._id);
+      if (fullRes && fullRes.success && fullRes.data) {
+        const fullData = fullRes.data;
+        const resolvedGallery = Array.isArray(fullData.gallery) && fullData.gallery.length > 0
+          ? fullData.gallery
+          : (fullData.image ? [fullData.image] : []);
+        setEventForm({
+          title: fullData.title,
+          category: fullData.category,
+          label: fullData.label,
+          location: fullData.location,
+          date: fullData.date,
+          image: fullData.image || (resolvedGallery[0] || ''),
+          gallery: resolvedGallery,
+          description: fullData.description,
+          isPublished: fullData.isPublished,
+          order: fullData.order || 0,
+        });
+      }
+    } catch (e) {
+      console.warn('Could not fetch full event detail:', e);
+    }
   };
 
   const handleSaveEvent = async (e) => {
@@ -786,51 +818,66 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {events.map((evt) => (
-                        <tr key={evt._id} style={{ borderBottom: '1px solid #eee' }}>
-                          <td style={{ padding: '12px 18px' }}>
-                            <img
-                              src={evt.image}
-                              alt=""
-                              style={{ width: '56px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
-                            />
-                          </td>
-                          <td style={{ padding: '12px 18px', fontWeight: 600, color: '#071020' }}>{evt.title}</td>
-                          <td style={{ padding: '12px 18px' }}>
-                            <span style={{ background: '#eee', padding: '3px 8px', borderRadius: '4px', fontSize: '11px' }}>
-                              {evt.category}
-                            </span>
-                          </td>
-                          <td style={{ padding: '12px 18px', color: '#666', fontSize: '12px' }}>{evt.location}</td>
-                          <td style={{ padding: '12px 18px' }}>
-                            {evt.isPublished ? (
-                              <span style={{ color: '#27ae60', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
-                                <CheckCircle size={14} /> Published
-                              </span>
-                            ) : (
-                              <span style={{ color: '#888', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
-                                <XCircle size={14} /> Draft
-                              </span>
-                            )}
-                          </td>
-                          <td style={{ padding: '12px 18px', textAlign: 'right' }}>
-                            <button
-                              onClick={() => openEditEventModal(evt)}
-                              style={{ background: 'none', border: 0, color: '#bd9636', cursor: 'pointer', marginRight: '14px' }}
-                              title="Edit Event"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteEvent(evt._id)}
-                              style={{ background: 'none', border: 0, color: '#d9383a', cursor: 'pointer' }}
-                              title="Delete Event"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                      {loadingEvents ? (
+                        <tr>
+                          <td colSpan="6" style={{ textAlign: 'center', padding: '40px 18px', color: '#666' }}>
+                            <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 8px', display: 'block', color: '#bd9636' }} />
+                            Loading events & stories...
                           </td>
                         </tr>
-                      ))}
+                      ) : events.length > 0 ? (
+                        events.map((evt) => (
+                          <tr key={evt._id || evt.id} style={{ borderBottom: '1px solid #eee' }}>
+                            <td style={{ padding: '12px 18px' }}>
+                              <img
+                                src={evt.image}
+                                alt=""
+                                style={{ width: '56px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                              />
+                            </td>
+                            <td style={{ padding: '12px 18px', fontWeight: 600, color: '#071020' }}>{evt.title}</td>
+                            <td style={{ padding: '12px 18px' }}>
+                              <span style={{ background: '#eee', padding: '3px 8px', borderRadius: '4px', fontSize: '11px' }}>
+                                {evt.category}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 18px', color: '#666', fontSize: '12px' }}>{evt.location}</td>
+                            <td style={{ padding: '12px 18px' }}>
+                              {evt.isPublished ? (
+                                <span style={{ color: '#27ae60', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+                                  <CheckCircle size={14} /> Published
+                                </span>
+                              ) : (
+                                <span style={{ color: '#888', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+                                  <XCircle size={14} /> Draft
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ padding: '12px 18px', textAlign: 'right' }}>
+                              <button
+                                onClick={() => openEditEventModal(evt)}
+                                style={{ background: 'none', border: 0, color: '#bd9636', cursor: 'pointer', marginRight: '14px' }}
+                                title="Edit Event"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteEvent(evt._id)}
+                                style={{ background: 'none', border: 0, color: '#d9383a', cursor: 'pointer' }}
+                                title="Delete Event"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" style={{ textAlign: 'center', padding: '36px 18px', color: '#888', fontSize: '13px' }}>
+                            No events currently in database. Click <strong>+ Add New Event</strong> above to create one.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

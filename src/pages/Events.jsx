@@ -7,8 +7,21 @@ import { defaultEvents } from '../data/defaultEvents';
 
 const categories = ['All Stories', 'Community', 'Fundraising', 'Sports', 'Outreach', 'Animal Welfare'];
 
+const getCachedEvents = () => {
+  try {
+    const cached = localStorage.getItem('saagar_cached_events');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch {}
+  return defaultEvents;
+};
+
 export default function Events() {
-  const [events, setEvents] = useState(defaultEvents);
+  const [events, setEvents] = useState(getCachedEvents);
   const [filter, setFilter] = useState('All Stories');
   const [loading, setLoading] = useState(false);
 
@@ -20,6 +33,9 @@ export default function Events() {
       .then((res) => {
         if (isMounted && res.success && res.data && res.data.length > 0) {
           setEvents(res.data);
+          try {
+            localStorage.setItem('saagar_cached_events', JSON.stringify(res.data));
+          } catch {}
         }
       })
       .catch(() => {})

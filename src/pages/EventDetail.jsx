@@ -30,7 +30,25 @@ export default function EventDetail() {
       e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === idOrSlug
   ) || defaultEvents[0];
 
-  const [event, setEvent] = useState(fallback);
+  const getInitialEvent = () => {
+    try {
+      const cached = localStorage.getItem('saagar_cached_events');
+      if (cached) {
+        const list = JSON.parse(cached);
+        const match = list.find(
+          (e) =>
+            e.slug === idOrSlug ||
+            e._id === idOrSlug ||
+            String(e.id) === idOrSlug ||
+            e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === idOrSlug
+        );
+        if (match) return match;
+      }
+    } catch {}
+    return fallback;
+  };
+
+  const [event, setEvent] = useState(getInitialEvent);
   const [allEvents, setAllEvents] = useState(defaultEvents);
   const [loading, setLoading] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);

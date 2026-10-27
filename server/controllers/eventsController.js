@@ -19,7 +19,10 @@ export const getPublishedEvents = async (req, res, next) => {
       filter.category = category;
     }
 
-    const events = await Event.find(filter).sort({ order: 1, createdAt: -1 });
+    // Exclude heavy gallery arrays from public listing for super-fast page loads
+    const events = await Event.find(filter)
+      .select('-gallery')
+      .sort({ order: 1, createdAt: -1 });
     res.status(200).json({ success: true, count: events.length, data: events });
   } catch (error) {
     next(error);
@@ -53,7 +56,10 @@ export const getEventByIdOrSlug = async (req, res, next) => {
 // GET /api/events/admin/all (Admin only)
 export const getAllEventsAdmin = async (req, res, next) => {
   try {
-    const events = await Event.find().sort({ order: 1, createdAt: -1 });
+    // Exclude heavy gallery arrays from admin table listing for instant loading
+    const events = await Event.find()
+      .select('-gallery')
+      .sort({ order: 1, createdAt: -1 });
     res.status(200).json({ success: true, count: events.length, data: events });
   } catch (error) {
     next(error);
