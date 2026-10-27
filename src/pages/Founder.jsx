@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Sparkles, ArrowRight, Quote } from 'lucide-react';
+import { ArrowRight, Quote, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import defaultPortrait from '../assets/memoona-founder.jpg';
 import { api } from '../services/api';
 
+const DEFAULT_BIO = `At just 17 years old, Memoona Ahmad had a simple yet life-changing realization: people around her needed help, and someone had to step forward. Instead of waiting for someone else to make a difference, she founded Saagar Foundation, turning compassion into action. Memoona believes that everyone is equal and dreams of building a society where differences no longer divide people. Outgoing, energetic, and straightforward, she enjoys connecting with people and believes in being honest while remaining professional and committed to every responsibility she takes on.
+
+Her love for Pakistan is at the heart of everything she does. Deeply patriotic, Memoona dreams of seeing Pakistan become the nation envisioned by Quaid-e-Azam Muhammad Ali Jinnah—a country built on unity, justice, discipline, and equal opportunities for all. His words continue to inspire her every step of the way. She firmly believes in his famous quote, "No power on earth can undo Pakistan," seeing it as a reminder of the nation's resilience and limitless potential. Another principle she lives by is, "With faith, discipline and selfless devotion to duty, there is nothing worthwhile that you cannot achieve." This philosophy became the driving force behind the creation of Saagar Foundation.
+
+As Saagar Foundation continues to grow, so does Memoona's vision. She hopes to inspire more young people to believe that age is never a barrier to making a difference and wants others to understand that meaningful change begins with one decision—the decision to care, to act, and to serve. For Memoona Ahmad, Saagar Foundation is only the beginning. Her journey is fueled by faith, guided by discipline, and driven by a dream of a stronger, more compassionate, and more united Pakistan.`;
+
 export default function Founder() {
   const [founderData, setFounderData] = useState({
-    name: 'Memoona',
+    name: 'Memoona Ahmad',
     title: 'Founder, Saagar Foundation',
     portraitUrl: '',
-    introduction: "The foundation’s work is guided by a commitment to compassion, kindness, and service to humanity.",
-    missionHighlight: "The mission of the Saagar Foundation is to help anyone in need, regardless of their circumstances, by providing support, resources, and assistance in whatever ways possible. Our goal is to make a positive difference in people's lives through compassion, kindness, and service to humanity.",
-    visionHighlight: "The vision of the Saagar Foundation is to build something meaningful and lasting—an organization that continues to grow, serve, and make a difference for generations to come. Our dream is to create a foundation that stands the test of time, reaching as many people in need as possible and providing help wherever it is needed. We aspire to build a legacy of compassion, generosity, and service that lives on forever, touching countless lives and inspiring others to do the same.",
+    bio: DEFAULT_BIO,
   });
 
   useEffect(() => {
@@ -21,7 +25,12 @@ export default function Founder() {
       .getFounderInfo()
       .then((res) => {
         if (isMounted && res.success && res.data) {
-          setFounderData((prev) => ({ ...prev, ...res.data }));
+          setFounderData((prev) => ({
+            ...prev,
+            ...res.data,
+            name: res.data.name || 'Memoona Ahmad',
+            bio: res.data.bio || DEFAULT_BIO,
+          }));
         }
       })
       .catch(() => {});
@@ -31,6 +40,11 @@ export default function Founder() {
   }, []);
 
   const portraitSrc = founderData.portraitUrl || defaultPortrait;
+
+  const bioParagraphs = (founderData.bio || DEFAULT_BIO)
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 
   return (
     <motion.div
@@ -62,9 +76,9 @@ export default function Founder() {
         >
           The person behind <em>the purpose.</em>
         </h1>
-        <p style={{ maxWidth: '580px', fontSize: '14px', lineHeight: 1.85, color: '#c5c9d4', margin: 0 }}>
-          Guided by empathy and an unwavering resolve to uplift communities in need, Memoona established Saagar
-          Foundation to transform compassion into tangible, everyday humanitarian service.
+        <p style={{ maxWidth: '620px', fontSize: '15px', lineHeight: 1.85, color: '#c5c9d4', margin: 0 }}>
+          At just 17 years old, Memoona Ahmad founded Saagar Foundation to turn compassion into action—bringing help
+          without hesitation and building a more united, compassionate Pakistan.
         </p>
       </section>
 
@@ -77,6 +91,8 @@ export default function Founder() {
               src={portraitSrc}
               alt={`${founderData.name}, ${founderData.title}`}
               style={{ objectFit: 'cover', borderRadius: '1px' }}
+              loading="eager"
+              decoding="async"
             />
             <span className="founder-frame-label">
               SAAGAR FOUNDATION <span>✳</span>
@@ -89,56 +105,40 @@ export default function Founder() {
             <span className="eyebrow-line"></span> {founderData.title.toUpperCase()}
           </span>
           <p className="founder-overline">FOUNDER & VISIONARY</p>
-          <h2 style={{ fontSize: 'clamp(44px, 5vw, 64px)' }}>
+          <h2 style={{ fontSize: 'clamp(40px, 5vw, 60px)', margin: '8px 0 28px' }}>
             Meet <em>{founderData.name}.</em>
           </h2>
 
+          {/* Narrative Content */}
           <div
+            className="founder-story"
             style={{
               display: 'flex',
-              gap: '14px',
-              margin: '22px 0 28px',
-              padding: '18px 20px',
-              background: 'rgba(239,199,94,0.1)',
-              borderLeft: '3px solid #efc75e',
+              flexDirection: 'column',
+              gap: '22px',
+              color: '#334155',
+              fontSize: '15.5px',
+              lineHeight: '1.85',
+              fontFamily: 'Plus Jakarta Sans, sans-serif',
             }}
           >
-            <Quote size={24} style={{ color: '#bd9636', flexShrink: 0, marginTop: '2px' }} />
-            <p
-              style={{
-                fontFamily: 'Playfair Display, serif',
-                fontSize: '16px',
-                fontStyle: 'italic',
-                lineHeight: 1.6,
-                color: '#1a2636',
-                margin: 0,
-              }}
-            >
-              "{founderData.introduction}"
-            </p>
+            {bioParagraphs.map((para, idx) => (
+              <p
+                key={idx}
+                style={{
+                  margin: 0,
+                  color: idx === 0 ? '#1e293b' : '#334155',
+                  fontSize: idx === 0 ? '16.5px' : '15.5px',
+                  fontWeight: idx === 0 ? 500 : 400,
+                  lineHeight: '1.85',
+                }}
+              >
+                {para}
+              </p>
+            ))}
           </div>
 
-          <div className="founder-values">
-            <article className="founder-value">
-              <div className="founder-value-top">
-                <span>01 / OUR MISSION</span>
-                <Heart size={17} />
-              </div>
-              <h3>Help, without hesitation.</h3>
-              <p>{founderData.missionHighlight}</p>
-            </article>
-
-            <article className="founder-value">
-              <div className="founder-value-top">
-                <span>02 / OUR VISION</span>
-                <Sparkles size={17} />
-              </div>
-              <h3>A legacy that lasts.</h3>
-              <p>{founderData.visionHighlight}</p>
-            </article>
-          </div>
-
-          <div style={{ marginTop: '36px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ marginTop: '40px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Link to="/events" className="button button-gold">
               Explore Our Ongoing Work <ArrowRight size={16} />
             </Link>
@@ -147,8 +147,8 @@ export default function Founder() {
             </Link>
           </div>
 
-          <p className="founder-note" style={{ marginTop: '28px' }}>
-            <span className="gold-dot"></span> Mission and vision statements belong to Saagar Foundation.
+          <p className="founder-note" style={{ marginTop: '32px' }}>
+            <span className="gold-dot"></span> Fueled by faith, guided by discipline, driven by service.
           </p>
         </div>
       </section>

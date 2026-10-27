@@ -90,9 +90,7 @@ export default function AdminDashboard() {
     name: '',
     title: '',
     portraitUrl: '',
-    introduction: '',
-    missionHighlight: '',
-    visionHighlight: '',
+    bio: '',
   });
   const [savingFounder, setSavingFounder] = useState(false);
   const [founderNotice, setFounderNotice] = useState('');
@@ -1325,33 +1323,18 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '18px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Quote / Introductory Statement</label>
-                  <textarea
-                    rows={2}
-                    value={founderData.introduction}
-                    onChange={(e) => setFounderData({ ...founderData, introduction: e.target.value })}
-                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '13px' }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '18px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Our Mission Statement</label>
-                  <textarea
-                    rows={4}
-                    value={founderData.missionHighlight}
-                    onChange={(e) => setFounderData({ ...founderData, missionHighlight: e.target.value })}
-                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '13px' }}
-                  />
-                </div>
-
                 <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Our Vision Statement</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>
+                    Founder Biography & Story (Displayed on /founder)
+                  </label>
+                  <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 8px' }}>
+                    Paragraphs are separated by double line breaks.
+                  </p>
                   <textarea
-                    rows={5}
-                    value={founderData.visionHighlight}
-                    onChange={(e) => setFounderData({ ...founderData, visionHighlight: e.target.value })}
-                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '13px' }}
+                    rows={12}
+                    value={founderData.bio || ''}
+                    onChange={(e) => setFounderData({ ...founderData, bio: e.target.value })}
+                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '13px', lineHeight: '1.6' }}
                   />
                 </div>
 
