@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block private admin pages from indexing
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: https://saagarfoundation.site/sitemap.xml
