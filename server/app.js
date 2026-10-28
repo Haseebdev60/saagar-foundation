@@ -34,22 +34,40 @@ app.use(
   })
 );
 
-// Allowed origins for CORS — restrict to known domains
-const ALLOWED_ORIGINS = [
-  'https://saagar-contact-work.vercel.app',
-  'https://saagarfoundation.org',
-  'https://www.saagarfoundation.org',
-  process.env.CLIENT_URL,
-].filter(Boolean);
+// Allowed origins checker for CORS
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true; // Server-to-server, curl, mobile apps
+
+  // Local development
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return true;
+  }
+
+  // Vercel deployment domains (*.vercel.app and preview urls)
+  if (/^https?:\/\/([a-z0-9-]+\.)*vercel\.app$/.test(origin)) {
+    return true;
+  }
+
+  // Custom production domains: saagarfoundation.site and saagarfoundation.org (apex and all subdomains)
+  if (/^https?:\/\/([a-z0-9-]+\.)*saagarfoundation\.(site|org)$/.test(origin)) {
+    return true;
+  }
+
+  // Optional custom CLIENT_URL from environment
+  if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL.replace(/\/$/, '')) {
+    return true;
+  }
+
+  return false;
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (server-to-server, curl, mobile apps)
-      if (!origin) return callback(null, true);
-      if (ALLOWED_ORIGINS.some((allowed) => origin === allowed || origin.endsWith('.vercel.app'))) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
+      console.warn(`[CORS Blocked] Origin: ${origin}`);
       callback(new Error('CORS: Origin not allowed'));
     },
     credentials: true,
